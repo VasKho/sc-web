@@ -5,6 +5,7 @@ import tornado.web
 import tornado.options
 import secret
 import os
+import sys
 import logging
 
 from handlers.main import MainHandler
@@ -36,7 +37,7 @@ class NoCacheStaticHandler(tornado.web.StaticFileHandler):
     def set_extra_headers(self, path):
         self.set_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
 
-def main():
+def main(sc_machine_path: str):
     
     logging.getLogger('asyncio').setLevel(logging.WARNING)
 
@@ -75,7 +76,7 @@ def main():
     database.init()
 
     # preparing for search
-    rocksdb_fm_path = os.path.abspath("../../kb.bin/file_memory")
+    rocksdb_fm_path = os.path.join(sc_machine_path, "kb.bin/file_memory")
     reader = RocksdbReader()
     reader.read_rocksdb(rocksdb_fm_path)
 
@@ -140,4 +141,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if sys.argv == 2:
+        sc_machine_path = os.path.abspath(sys.argv[1])
+        main(sc_machine_path)
+    else:
+        print("Invalid number of arguments!")
